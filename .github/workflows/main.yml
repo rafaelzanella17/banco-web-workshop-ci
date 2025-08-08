@@ -1,8 +1,8 @@
 name: 'Banco Web - CI'
 
-# gatilhos / triggers
+# Gatilhos / Triggers
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Executa manualmente pelo botão "Run workflow" no GitHub
 
 jobs:
   tests:
@@ -10,20 +10,39 @@ jobs:
 
     env:
       API_BASE_URL: 'http://localhost:3000'
-      PORT: 4000 
+      PORT: 4000
 
     steps:
+      # 1️⃣ Baixa o código do repositório
       - name: Checkout do repositorio
         uses: actions/checkout@v4
 
-      - name: Instalar deps
+      # 2️⃣ Configura a versão do Node.js
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22' # mesma versão que você usa localmente
+          cache: 'npm'       # cache automático do node_modules
+
+      # 3️⃣ Instala dependências
+      - name: Instalar dependências
         run: npm install
 
+      # 4️⃣ Instala utilitário para esperar o servidor
+      - name: Instalar wait-on
+        run: npm install -g wait-on
+
+      # 5️⃣ Inicia servidores em background
       - name: Iniciar o servidor de mocks
         run: npm run mock-server &
 
-      - name: Iniciar o servidor da aplicacao
+      - name: Iniciar o servidor da aplicação
         run: npm run server &
 
-      - name: Executar os testes
+      # 6️⃣ Aguarda até que a aplicação esteja no ar
+      - name: Aguardar servidor iniciar
+        run: wait-on http://localhost:4000
+
+      # 7️⃣ Executa os testes Cypress
+      - name: Executar testes E2E
         run: npx cypress run
