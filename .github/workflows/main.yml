@@ -1,5 +1,9 @@
 name: 'Banco Web - CI'
 
+#
+on:
+  workflow_dispatch:
+
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -16,10 +20,10 @@ jobs:
         run: npm install
 
       - name: Iniciar o servidor de mocks
-        run: npm run mock-server
+        run: npm run mock-server &
 
       - name: Iniciar o servidor da aplicacao
-        run: npm run server
+        run: npm run server &
 
       - name: Executar os testes
         run: npx cypress run
